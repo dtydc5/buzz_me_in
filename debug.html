@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <body>
+		<h1>Call Request</h1>
+		<pre>{{ call_request }}</pre>
+
+		<h1>Call Response</h1>
+		<pre>{{ call_response }}</pre>
+
+		<h1>SMS Request</h1>
+		<pre>{{ sms_request }}</pre>
+
+		<h1>SMS Response</h1>
+		<pre>{{ sms_response }}</pre>
+  </body>
+</html>
+{% endautoescape %}
