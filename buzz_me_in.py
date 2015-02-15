@@ -19,7 +19,8 @@ def expandTemplate(fileName, values):
 class ReceiveCall(webapp2.RequestHandler):
     def post(self):
         r = twiml.Response()
-        r.say("F: %s, CS: %s" % (self.request.get("From"), self.request.get("CallStatus")))
+        r.play(digits="9"*3)
+        r.sms("F: %s, CS: %s" % (self.request.get("From"), self.request.get("CallStatus")))
         
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
