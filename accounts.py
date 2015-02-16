@@ -1,6 +1,7 @@
 import os
 import webapp2
 import jinja2
+from google.appengine.api import users
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -15,7 +16,15 @@ def expandTemplate(fileName, values):
 
 class EditAccount(webapp2.RequestHandler):
     def get(self):
-        self.response.write(expandTemplate("edit_account.html", dict()))
+        user = users.get_current_user()
+        if user:
+            self.response.write(expandTemplate("edit_account.html", {
+                "logout_url": users.create_logout_url(self.request.uri)
+            }))
+        else:
+            self.response.write(expandTemplate("welcome.html", {
+                "login_url": users.create_login_url(self.request.uri)
+            }))            
 
 
 application = webapp2.WSGIApplication([
