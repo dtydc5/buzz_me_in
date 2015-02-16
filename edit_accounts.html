@@ -27,6 +27,7 @@
         <td>{{ a.name }}</td>
         <td>{{ a.phone }}</td>
         <td>{{ a.date }}</td>
+        <td><a href="/delete?account={{ a.key.urlsafe() }}">Delete</a></td>
       </tr>
     {% endfor %}
   </table>

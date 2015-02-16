@@ -43,6 +43,13 @@ class AddAccount(webapp2.RequestHandler):
         
         self.redirect("/")
 
+class DeleteAccount(webapp2.RequestHandler):
+    def get(self):
+        accountKey = ndb.Key(urlsafe=self.request.get("account"))
+        accountKey.delete()
+        
+        self.redirect("/")
+
 class ReceiveCall(webapp2.RequestHandler):
     def post(self):
         r = twiml.Response()
@@ -81,6 +88,7 @@ class DisplayDebugInfo(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([
     ('/', EditAccounts),
     ('/add', AddAccount),
+    ('/delete', DeleteAccount),
     
     ('/call', ReceiveCall),
     ('/sms', ReceiveSMS),
