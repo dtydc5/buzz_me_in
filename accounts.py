@@ -19,11 +19,12 @@ class EditAccount(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:
             self.response.write(expandTemplate("edit_account.html", {
-                "logout_url": users.create_logout_url(self.request.uri)
+                "logout_url": users.create_logout_url(self.request.uri),
+                "account": user,
             }))
         else:
             self.response.write(expandTemplate("welcome.html", {
-                "login_url": users.create_login_url(self.request.uri)
+                "login_url": users.create_login_url(self.request.uri),
             }))            
 
 
