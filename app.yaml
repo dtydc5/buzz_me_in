@@ -11,5 +11,8 @@ libraries:
   version: latest
 
 handlers:
+- url: /(call|sms)
+  script: buzz_me_in.application
 - url: /.*
   script: buzz_me_in.application
+  login: admin
