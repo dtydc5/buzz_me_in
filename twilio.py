@@ -52,8 +52,8 @@ class DisplayDebugInfo(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([
-    ('/call', ReceiveCall),
-    ('/sms', ReceiveSMS),
-    ('/debug', DisplayDebugInfo),
+    ('/twilio/call', ReceiveCall),
+    ('/twilio/sms', ReceiveSMS),
+    ('/twilio/debug', DisplayDebugInfo),
 ], debug=True)
  

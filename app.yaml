@@ -11,5 +11,5 @@ libraries:
   version: latest
 
 handlers:
-- url: /.*
-  script: buzz_me_in.application
+- url: /twilio/.*
+  script: twilio.application
