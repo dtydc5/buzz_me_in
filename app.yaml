@@ -13,3 +13,5 @@ libraries:
 handlers:
 - url: /twilio/.*
   script: twilio.application
+- url: /.*
+  script: accounts.application
