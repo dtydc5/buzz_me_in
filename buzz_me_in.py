@@ -20,6 +20,10 @@ class EditAccounts(webapp2.RequestHandler):
     def get(self):
         self.response.write(expandTemplate("edit_accounts.html", {}))
 
+class AddAccount(webapp2.RequestHandler):
+    def post(self):
+        self.redirect("/")
+
 class ReceiveCall(webapp2.RequestHandler):
     def post(self):
         r = twiml.Response()
@@ -57,6 +61,8 @@ class DisplayDebugInfo(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', EditAccounts),
+    ('/add', AddAccount),
+    
     ('/call', ReceiveCall),
     ('/sms', ReceiveSMS),
     ('/debug', DisplayDebugInfo),
