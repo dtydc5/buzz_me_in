@@ -1,9 +1,18 @@
 import os
+
+from google.appengine.ext import ndb
 from google.appengine.api import memcache
 import webapp2
 import jinja2
 
 import twiml
+
+
+ACCOUNTS_KEY = ndb.Key("AllAccounts", "AllAccounts")
+class Account(ndb.Model):
+    name = ndb.StringProperty()
+    phone = ndb.StringProperty()
+    date = ndb.DateTimeProperty(auto_now_add=True)
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -18,10 +27,20 @@ def expandTemplate(fileName, values):
 
 class EditAccounts(webapp2.RequestHandler):
     def get(self):
-        self.response.write(expandTemplate("edit_accounts.html", {}))
+        aq = Account.query(ancestor=ACCOUNTS_KEY)
+        accounts = aq.fetch()
+        
+        self.response.write(expandTemplate("edit_accounts.html", {
+            "accounts": accounts,
+        }))
 
 class AddAccount(webapp2.RequestHandler):
     def post(self):
+        a = Account(parent=ACCOUNTS_KEY)
+        a.name = self.request.get("name")
+        a.phone = self.request.get("phone")
+        a.put()
+        
         self.redirect("/")
 
 class ReceiveCall(webapp2.RequestHandler):
