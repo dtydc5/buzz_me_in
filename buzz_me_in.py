@@ -79,10 +79,15 @@ class ReceiveSMS(webapp2.RequestHandler):
     def post(self):
         if not isFromTwilio("sms", self.request):
             return
+        
+        # does user exist?
+        aq = Account.query(ancestor=ACCOUNTS_KEY).filter(Account.phone == self.request.get("From"))
+        account = aq.get()
+        if account is None:
+            return
 
         r = twiml.Response()
         r.message("F: %s, B: %s" % (self.request.get("From"), self.request.get("Body")))
-        
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
 
