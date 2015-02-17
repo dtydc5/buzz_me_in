@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
@@ -10,7 +11,10 @@ from twilio import twiml
 from twilio.util import RequestValidator
 
 
+OPEN_TIME = 5  # minutes
 ACCOUNTS_KEY = ndb.Key("AllAccounts", "AllAccounts")
+
+
 class Account(ndb.Model):
     name = ndb.StringProperty()
     phone = ndb.StringProperty()
@@ -85,9 +89,12 @@ class ReceiveSMS(webapp2.RequestHandler):
         account = aq.get()
         if account is None:
             return
+            
+        account.date = datetime.datetime.utcnow() + datetime.timedelta(minutes=OPEN_TIME);
+        account.put()
 
         r = twiml.Response()
-        r.message("F: %s, B: %s" % (self.request.get("From"), self.request.get("Body")))
+        r.message("Door unlocked for %d minutes" % OPEN_TIME)
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
 
