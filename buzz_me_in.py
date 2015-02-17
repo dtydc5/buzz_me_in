@@ -62,10 +62,13 @@ class DeleteAccount(webapp2.RequestHandler):
 
 class ReceiveCall(webapp2.RequestHandler):
     def post(self):
+        if not isFromTwilio("call", self.request):
+            return
+
         r = twiml.Response()
         r.play(digits="9"*3)
-        r.sms("F: %s, CS: %s, V: %d" % (self.request.get("From"), self.request.get("CallStatus"), isFromTwilio("call", self.request)))
-        
+        r.sms("F: %s, CS: %s" % (self.request.get("From"), self.request.get("CallStatus")))
+    
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
 
@@ -74,8 +77,11 @@ class ReceiveCall(webapp2.RequestHandler):
 
 class ReceiveSMS(webapp2.RequestHandler):
     def post(self):
+        if not isFromTwilio("sms", self.request):
+            return
+
         r = twiml.Response()
-        r.message("F: %s, B: %s, V: %u" % (self.request.get("From"), self.request.get("Body"), isFromTwilio("sms", self.request)))
+        r.message("F: %s, B: %s" % (self.request.get("From"), self.request.get("Body")))
         
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
