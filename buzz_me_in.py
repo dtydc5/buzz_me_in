@@ -5,7 +5,7 @@ from google.appengine.api import memcache
 import webapp2
 import jinja2
 
-import twiml
+from twilio import twiml
 
 
 ACCOUNTS_KEY = ndb.Key("AllAccounts", "AllAccounts")
