@@ -4,8 +4,10 @@ from google.appengine.ext import ndb
 from google.appengine.api import memcache
 import webapp2
 import jinja2
+import yaml
 
 from twilio import twiml
+from twilio.util import RequestValidator
 
 
 ACCOUNTS_KEY = ndb.Key("AllAccounts", "AllAccounts")
@@ -23,6 +25,14 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 def expandTemplate(fileName, values):
     template = JINJA_ENVIRONMENT.get_template(fileName)
     return template.render(values)
+
+
+with open("credentials.yaml") as f:
+    CREDENTIALS = yaml.safe_load(f)
+def isFromTwilio(localUrl, request):
+    signature = request.headers["X-Twilio-Signature"]
+    validator = RequestValidator(CREDENTIALS["twilio_auth_token"])
+    return validator.validate(CREDENTIALS["twilio_base_url"] + localUrl, request.params, signature)
 
 
 class EditAccounts(webapp2.RequestHandler):
@@ -54,7 +64,7 @@ class ReceiveCall(webapp2.RequestHandler):
     def post(self):
         r = twiml.Response()
         r.play(digits="9"*3)
-        r.sms("F: %s, CS: %s" % (self.request.get("From"), self.request.get("CallStatus")))
+        r.sms("F: %s, CS: %s, V: %d" % (self.request.get("From"), self.request.get("CallStatus"), isFromTwilio("call", self.request)))
         
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
@@ -65,7 +75,7 @@ class ReceiveCall(webapp2.RequestHandler):
 class ReceiveSMS(webapp2.RequestHandler):
     def post(self):
         r = twiml.Response()
-        r.message("F: %s, B: %s" % (self.request.get("From"), self.request.get("Body")))
+        r.message("F: %s, B: %s, V: %u" % (self.request.get("From"), self.request.get("Body"), isFromTwilio("sms", self.request)))
         
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
