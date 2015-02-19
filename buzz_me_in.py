@@ -19,6 +19,11 @@ class Account(ndb.Model):
     name = ndb.StringProperty()
     phone = ndb.StringProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
+    
+    @classmethod
+    def fromPhone(cls, phone):
+        aq = Account.query(ancestor=ACCOUNTS_KEY).filter(Account.phone == phone)
+        return aq.get()
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -85,8 +90,7 @@ class ReceiveSMS(webapp2.RequestHandler):
             return
         
         # does user exist?
-        aq = Account.query(ancestor=ACCOUNTS_KEY).filter(Account.phone == self.request.get("From"))
-        account = aq.get()
+        account = Account.fromPhone(self.request.get("From"))
         if account is None:
             return
             
