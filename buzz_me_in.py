@@ -71,6 +71,9 @@ class DeleteAccount(webapp2.RequestHandler):
 
 class ReceiveCall(webapp2.RequestHandler):
     def post(self):
+        memcache.set("call_request", value=str(self.request))
+        memcache.set("call_response", value="-1")
+
         if not isFromTwilio("call", self.request):
             return
 
@@ -81,11 +84,13 @@ class ReceiveCall(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
 
-        memcache.set("call_request", value=str(self.request))
         memcache.set("call_response", value=str(self.response))
 
 class ReceiveSMS(webapp2.RequestHandler):
     def post(self):
+        memcache.set("sms_request", value=str(self.request))
+        memcache.set("sms_response", value="-1")
+        
         if not isFromTwilio("sms", self.request):
             return
         
@@ -102,7 +107,6 @@ class ReceiveSMS(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
 
-        memcache.set("sms_request", value=str(self.request))
         memcache.set("sms_response", value=str(self.response))
 
 class DisplayDebugInfo(webapp2.RequestHandler):
