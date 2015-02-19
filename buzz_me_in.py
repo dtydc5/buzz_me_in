@@ -86,8 +86,10 @@ class ReceiveCall(webapp2.RequestHandler):
             return
 
         r = twiml.Response()
-        r.play(digits="9"*3)
-        r.sms("F: %s, CS: %s" % (self.request.get("From"), self.request.get("CallStatus")))
+        if self.request.get("From") == CREDENTIALS["door_phone_number"]:
+            r.play(digits="9"*3)
+        else:
+            r.hangup()    
     
         self.response.headers['Content-Type'] = 'text/xml'
         self.response.write(str(r))
