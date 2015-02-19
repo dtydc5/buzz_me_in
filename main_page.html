@@ -11,10 +11,17 @@
 <body>
   <h1>Buzz Me In!</h1>
   <form action="/add" method="post">
-    <input type="text" name="name" value="Name">
-    <input type="text" name="phone" value="+19991231234">
+    <input type="text" name="name" onClick="this.select();" value="Name">
+    <input type="text" name="phone" onClick="this.select();" value="+19991231234">
     <input type="submit" value="Add">
   </form>
+  
+  {% if duplicate %}
+  <div style="background-color:red; color:yellow">
+    Duplicate phone number: {{ duplicate }}
+  </div>
+  <br>
+  {% endif %}
   
   <table>
     <tr>

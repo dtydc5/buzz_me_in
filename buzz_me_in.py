@@ -1,5 +1,6 @@
 import os
 import datetime
+import urllib
 
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
@@ -21,7 +22,7 @@ class Account(ndb.Model):
     date = ndb.DateTimeProperty(auto_now_add=True)
     
     @classmethod
-    def fromPhone(cls, phone):
+    def get_by_phone(cls, phone):
         aq = Account.query(ancestor=ACCOUNTS_KEY).filter(Account.phone == phone)
         return aq.get()
 
@@ -44,20 +45,27 @@ def isFromTwilio(localUrl, request):
     return validator.validate(CREDENTIALS["twilio_base_url"] + localUrl, request.params, signature)
 
 
-class EditAccounts(webapp2.RequestHandler):
+class MainPage(webapp2.RequestHandler):
     def get(self):
         aq = Account.query(ancestor=ACCOUNTS_KEY)
         accounts = aq.fetch()
         
-        self.response.write(expandTemplate("edit_accounts.html", {
+        self.response.write(expandTemplate("main_page.html", {
             "accounts": accounts,
+            "duplicate": self.request.get("duplicate"),
         }))
 
 class AddAccount(webapp2.RequestHandler):
     def post(self):
+        phone = self.request.get("phone")
+        
+        if Account.get_by_phone(phone) is not None:
+            self.redirect("/?duplicate=" + urllib.quote_plus(phone))
+            return
+        
         a = Account(parent=ACCOUNTS_KEY)
         a.name = self.request.get("name")
-        a.phone = self.request.get("phone")
+        a.phone = phone
         a.put()
         
         self.redirect("/")
@@ -95,7 +103,7 @@ class ReceiveSMS(webapp2.RequestHandler):
             return
         
         # does user exist?
-        account = Account.fromPhone(self.request.get("From"))
+        account = Account.get_by_phone(self.request.get("From"))
         if account is None:
             return
             
@@ -122,7 +130,7 @@ class DisplayDebugInfo(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([
-    ('/', EditAccounts),
+    ('/', MainPage),
     ('/add', AddAccount),
     ('/delete', DeleteAccount),
     
