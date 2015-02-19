@@ -23,7 +23,7 @@ class Account(ndb.Model):
     
     @classmethod
     def get_by_phone(cls, phone):
-        aq = Account.query(ancestor=ACCOUNTS_KEY).filter(Account.phone == phone)
+        aq = cls.query(ancestor=ACCOUNTS_KEY).filter(cls.phone == phone)
         return aq.get()
 
 
