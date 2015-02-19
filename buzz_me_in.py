@@ -26,6 +26,13 @@ class Account(ndb.Model):
         aq = cls.query(ancestor=ACCOUNTS_KEY).filter(cls.phone == phone)
         return aq.get()
 
+    @classmethod
+    def openRequests(cls):
+        """ Return the oldest of the tickled accounts
+        """
+        aq = cls.query(cls.date >= datetime.datetime.utcnow(), ancestor=ACCOUNTS_KEY).order(cls.date)
+        return aq.fetch()
+
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -47,11 +54,15 @@ def isFromTwilio(localUrl, request):
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        aq = Account.query(ancestor=ACCOUNTS_KEY)
+        openReqs = Account.openRequests()
+        openNames = ", ".join(map(lambda a: a.name, openReqs))
+        
+        aq = Account.query(ancestor=ACCOUNTS_KEY).order(-Account.date)
         accounts = aq.fetch()
         
         self.response.write(expandTemplate("main_page.html", {
             "accounts": accounts,
+            "openNames": openNames,
             "duplicate": self.request.get("duplicate"),
         }))
 
@@ -86,8 +97,13 @@ class ReceiveCall(webapp2.RequestHandler):
             return
 
         r = twiml.Response()
-        if self.request.get("From") == CREDENTIALS["door_phone_number"]:
+        openReqs = Account.openRequests()
+        if self.request.get("From") == CREDENTIALS["door_phone_number"] and len(openReqs) > 0:
             r.play(digits="9"*3)
+            
+            # reset oldest request
+            openReqs[0].date = datetime.datetime.utcnow()
+            openReqs[0].put()
         else:
             r.hangup()    
     
@@ -109,6 +125,7 @@ class ReceiveSMS(webapp2.RequestHandler):
         if account is None:
             return
             
+        # tickle
         account.date = datetime.datetime.utcnow() + datetime.timedelta(minutes=OPEN_TIME);
         account.put()
 
